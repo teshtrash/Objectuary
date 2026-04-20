@@ -37,33 +37,23 @@ export default function OpeningScreen({ onEnter }) {
       <div className="opening-content">
         <div className="critique-block">
           <p className="critique-item">
-            <strong>1. The "Designer as Savior" Complex</strong> — You claim to represent the
-            "othered," but your document is entirely your own voice. You describe the Pavement
-            Hawker Stall with flowery, poetic prose — "fruit, grams, and small comforts" —
-            which feels like a romanticized observation from a student's sketchbook rather than
-            a rigorous interrogation of displacement. By "writing the story on behalf of them,"
-            you are technically performing the exact act of "Othering" you claim to critique:
-            you are the dominant voice defining the silent subject.
+            <strong>Objectuary</strong><br />
+            where objects go when they're no longer allowed to exist
+          </p>
+          <p className="critique-item" style={{ marginBottom: '1.5rem' }}>
+            Some things don't just disappear — they get pushed out. Objects, like people, can be othered: replaced, repurposed, buried, or simply ignored until they stop mattering. This is a cemetery for those objects. Each grave holds a story of exclusion, displacement, or quiet erasure. You're here to read the obituaries.
           </p>
           <p className="critique-item">
-            <strong>2. Visual Language vs. Conceptual Weight</strong> — Your sketches are literal.
-            A cemetery for dead things is the most "Entry Level" metaphor possible for "Otherness".
-            While the concept of the "Objectuary" is clever, the visual execution (simple tombstones)
-            doesn't yet live up to the complexity of the sociological theory you are citing about
-            "unbridgeable unknown" states of being.
+            <strong>Explore the graveyard</strong><br />
+            Walk through the map and find graves — each one is an object with a story
           </p>
           <p className="critique-item">
-            <strong>3. The Interaction Paradox</strong> — Your "zero-sum" attention mechanic is your
-            strongest idea, but it's currently a double-edged sword. If this is a library intended
-            for "memorium and celebration," allowing the most vulnerable stories to disappear because
-            they aren't "popular" is a cruel design choice. You've built a system that punishes the
-            "Other" for not being interesting enough to the user.
+            <strong>Read the objectuary</strong><br />
+            Click a grave to open its newspaper clipping — the life and disappearance of that object
           </p>
           <p className="critique-item">
-            <strong>4. Technical Sloppiness</strong> — In the second semester, details matter.
-            Misspelling "DECEASED" as "DESEASED" on your primary cover image is a "hard fail" in
-            a professional or academic presentation. It suggests that while you are thinking deeply
-            about "Otherness," you aren't looking closely at your own canvas.
+            <strong>Run the forensics</strong><br />
+            Unlock a scan showing what the object was made of, how it ended, and what came after
           </p>
         </div>
 

@@ -43,16 +43,21 @@ function generateTombs() {
   for (let i = 0; i < TOMB_COUNT; i++) {
     const col = i % 5
     const row = Math.floor(i / 5)
-    const baseX = (col / 5) * 100 + 10
-    const baseY = (row / 4) * 100 + 12
-    const jitterX = (rand() - 0.5) * 10
-    const jitterY = (rand() - 0.5) * 12
+    // Pull the grid closer together. 
+    // col / 4 goes from 0 to 1. We span from 25% to 75% of width.
+    const baseX = (col / 4) * 50 + 25
+    // row / 3 goes from 0 to 1. We span from 25% to 75% of height.
+    const baseY = (row / 3) * 55 + 20
+    
+    // Slight jitter so it doesn't look perfectly aligned, but tighter than before
+    const jitterX = (rand() - 0.5) * 8
+    const jitterY = (rand() - 0.5) * 8
     const isPalanquin = i === palanquinIdx
 
     tombs.push({
       id: i + 1,
-      x: Math.max(3, Math.min(95, baseX + jitterX)),
-      y: Math.max(4, Math.min(93, baseY + jitterY)),
+      x: Math.max(5, Math.min(95, baseX + jitterX)),
+      y: Math.max(5, Math.min(95, baseY + jitterY)),
       isPalanquin,
       rotation: (rand() - 0.5) * 6,
       image: tombImage(i),

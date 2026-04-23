@@ -38,7 +38,7 @@ const RESULT_DATA = {
 
 function getTombWidth(tomb, views) {
   const base = tomb.isPalanquin ? 88 : 80
-  const clicks = views[tomb.id] || 0
+  const clicks = views[String(tomb.id)] || 0
   // Each click adds 8% width, up to 160% max growth
   return base * (1 + Math.min(clicks * 0.08, 1.6))
 }
@@ -372,7 +372,7 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
     }, 1400)
 
     // Fire API call immediately — state will update and tomb width re-renders
-    incrementAttention(tomb.id)
+    incrementAttention(String(tomb.id))
 
     // Delay before opening the hovering view so the +1 animation + growth are visible
     setTimeout(() => {
@@ -504,7 +504,7 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
       <div className="cemetery-map" ref={mapRef}>
         {tombs.map((tomb, i) => {
           const w = getTombWidth(tomb, tombViews)
-          const clicks = tombViews[tomb.id] || 0
+          const clicks = tombViews[String(tomb.id)] || 0
           const off = tombOffsets[tomb.id] || { dx: 0, dy: 0 }
           const shakeDelay = ((i * 2.7 + 1.3) % 5).toFixed(1)
           const shakeDuration = (2 + (i % 3) * 0.8).toFixed(1)
@@ -521,6 +521,7 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
                 '--shake-delay': `${shakeDelay}s`,
                 '--shake-duration': `${shakeDuration}s`,
                 zIndex: clicks > 0 ? 5 + Math.min(clicks, 25) : 'auto',
+
               }}
               onClick={zoomed && !selectedTomb ? (e) => handleTombClick(e, tomb) : undefined}
             >
@@ -595,12 +596,11 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
                   onTouchStart={handleScanPointerDown}
                 >
                   <img src={SCANNER} alt="Scanner" />
+                  {/* Drag hint — next to scanner */}
+                  {scanProgress === 0 && (
+                    <span className="scanner-drag-hint">drag scanner<br />down to scan</span>
+                  )}
                 </div>
-              )}
-
-              {/* Drag hint */}
-              {!scanComplete && scanProgress === 0 && (
-                <span className="scanner-drag-hint">drag scanner down to scan</span>
               )}
 
               {/* Result image — fades in with progress, replaces paper when complete */}

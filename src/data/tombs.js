@@ -43,8 +43,8 @@ function generateTombs() {
   for (let i = 0; i < TOMB_COUNT; i++) {
     const col = i % 5
     const row = Math.floor(i / 5)
-    const baseX = (col / 4) * 50 + 25
-    const baseY = (row / 3) * 55 + 20
+    const baseX = (col / 4) * 40 + 30
+    const baseY = (row / 3) * 40 + 30
     slots.push({
       x: Math.max(5, Math.min(95, baseX + (rand() - 0.5) * 8)),
       y: Math.max(5, Math.min(95, baseY + (rand() - 0.5) * 8)),

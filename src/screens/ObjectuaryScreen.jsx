@@ -5,7 +5,7 @@ import { GRAVE_BG, OBJECTUARY_ICON, SCANNER_ON, SCANNER } from '../assets'
 import { useAttention } from '../hooks/useAttention'
 import { useAudio } from '../hooks/useAudio'
 import {
-  AMBIENT_SOUNDTRACK, ZOOM_IN, ZOOM_OUT, GRAVE_HOVER, CLICK,
+  AMBIENT_SOUNDTRACK, ZOOM_IN, ZOOM_OUT, GRAVE_HOVER, CLICK, GENERIC_CLICK,
   SCANNER_HOVERING, PAPER_HOVERING, SCANNER_LOOP, SCANNING_DONE,
   RESULT_SOUNDS,
 } from '../audio'
@@ -90,9 +90,8 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
       }
       hasRevealedRef.current = true
       setTimeout(() => { readyRef.current = true }, 300)
-      loop(AMBIENT_SOUNDTRACK, { volume: 0.3 })
     }
-  }, [disableInteraction, loop])
+  }, [disableInteraction])
 
   useEffect(() => {
     if (revealing && !hasRevealedRef.current && mapRef.current) {
@@ -158,14 +157,16 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
       y: tomb.y * vh / 100,
     }))
     const widths = tombs.map(tomb => getTombWidth(tomb, tombViews))
-    const HR = 0.85 // approximate height-to-width ratio
-    for (let iter = 0; iter < 35; iter++) {
+    const HR = 0.95 // increased height-to-width ratio for better vertical clearing
+    for (let iter = 0; iter < 50; iter++) { // Increased iterations
       for (let i = 0; i < tombs.length; i++) {
         for (let j = i + 1; j < tombs.length; j++) {
           const dx = pos[j].x - pos[i].x
           const dy = pos[j].y - pos[i].y
-          const minX = (widths[i] + widths[j]) / 2 + 10
-          const minY = (widths[i] * HR + widths[j] * HR) / 2 + 10
+          // Increased base padding and added dynamic padding based on size
+          const dynamicPadding = Math.max(widths[i], widths[j]) * 0.15 + 20
+          const minX = (widths[i] + widths[j]) / 2 + dynamicPadding
+          const minY = (widths[i] * HR + widths[j] * HR) / 2 + dynamicPadding
           const ox = minX - Math.abs(dx)
           const oy = minY - Math.abs(dy)
           if (ox > 0 && oy > 0) {
@@ -176,15 +177,24 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
             const rj = 1 - ri
             if (ox < oy) {
               const dir = Math.sign(dx) || 1
-              pos[i].x -= ox * 0.6 * ri * dir
-              pos[j].x += ox * 0.6 * rj * dir
+              pos[i].x -= ox * 0.8 * ri * dir // Increased repulsion strength
+              pos[j].x += ox * 0.8 * rj * dir
             } else {
               const dir = Math.sign(dy) || 1
-              pos[i].y -= oy * 0.6 * ri * dir
-              pos[j].y += oy * 0.6 * rj * dir
+              pos[i].y -= oy * 0.8 * ri * dir
+              pos[j].y += oy * 0.8 * rj * dir
             }
           }
         }
+      }
+      
+      const paddingX = vw * 0.15
+      const paddingY = vh * 0.15
+      for (let i = 0; i < tombs.length; i++) {
+        if (pos[i].x < paddingX) pos[i].x += (paddingX - pos[i].x) * 0.5
+        if (pos[i].x > vw - paddingX) pos[i].x -= (pos[i].x - (vw - paddingX)) * 0.5
+        if (pos[i].y < paddingY) pos[i].y += (paddingY - pos[i].y) * 0.5
+        if (pos[i].y > vh - paddingY) pos[i].y -= (pos[i].y - (vh - paddingY)) * 0.5
       }
     }
     setTombOffsets(
@@ -382,13 +392,14 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
 
   const handleBackFromHover = useCallback((e) => {
     e.stopPropagation()
+    play(GENERIC_CLICK)
     if (hoverRef.current) {
       gsap.to(hoverRef.current, {
         opacity: 0, duration: 0.3, ease: 'power2.in',
         onComplete: () => setSelectedTomb(null),
       })
     }
-  }, [])
+  }, [play])
 
   const handleOpenPaper = useCallback((e) => {
     e.stopPropagation()
@@ -399,6 +410,7 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
   const handleClosePaper = useCallback((e) => {
     e.stopPropagation()
     if (scanComplete) return
+    play(GENERIC_CLICK)
     play(PAPER_HOVERING)
     if (paperRef.current) {
       gsap.to(paperRef.current, {
@@ -411,16 +423,12 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
   // Return to cemetery from scan result
   const handleReturnToCemetery = useCallback(() => {
     play(CLICK)
-    // Stop the looping result sound
-    if (scanResult && RESULT_SOUNDS[scanResult]) {
-      stop(RESULT_SOUNDS[scanResult])
-    }
     setShowPaper(false)
     setSelectedTomb(null)
     setScanComplete(false)
     setScanProgress(0)
     setScanResult(null)
-  }, [play, stop, scanResult])
+  }, [play])
 
   // Scanner drag handlers (vertical, bidirectional)
   const updateScanProgress = useCallback((clientY) => {
@@ -472,10 +480,6 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
         setScanProgress(100)
         setScanComplete(true)
         play(SCANNING_DONE)
-        if (scanResult && RESULT_SOUNDS[scanResult]) {
-          // Loop result sound until user returns to cemetery
-          setTimeout(() => loop(RESULT_SOUNDS[scanResult]), 400)
-        }
       }
     }
 
@@ -516,7 +520,7 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
                 left: `${tomb.x + off.dx}%`,
                 top: `${tomb.y + off.dy}%`,
                 width: `${w}px`,
-                transform: `translateX(-50%) rotate(${tomb.rotation}deg)`,
+                transform: `translate(-50%, -50%) rotate(${tomb.rotation}deg)`,
                 '--tomb-rot': `${tomb.rotation}deg`,
                 '--shake-delay': `${shakeDelay}s`,
                 '--shake-duration': `${shakeDuration}s`,
@@ -574,16 +578,9 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
 
             {/* Scanner overlay — vertical */}
             <div className="scanner-overlay" ref={scannerContainerRef}>
-              {/* Scan overlay sweeping trail */}
-              {!scanComplete && scanProgress > 0 && (
-                <div
-                  className="scan-overlay-trail"
-                  style={{
-                    top: 0,
-                    height: `${scanProgress}%`,
-                    opacity: dragging ? 1 : 0.4, /* Dim when paused */
-                  }}
-                />
+              {/* Static scan track (green bar) */}
+              {!scanComplete && (
+                <div className="scan-track" />
               )}
 
               {/* Scanner device — starts at top, drag down */}
@@ -596,7 +593,7 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
                   onTouchStart={handleScanPointerDown}
                 >
                   <img src={SCANNER} alt="Scanner" />
-                  {/* Drag hint — next to scanner */}
+                  {/* Drag hint text */}
                   {scanProgress === 0 && (
                     <span className="scanner-drag-hint">drag scanner<br />down to scan</span>
                   )}
@@ -629,13 +626,13 @@ export default function ObjectuaryScreen({ onSelect, onHome, disableInteraction 
 
       {/* Home Button */}
       {!selectedTomb && !showPaper && (
-        <button className="home-btn" onClick={onHome} title="Return to Home">
+        <button className="home-btn" onClick={() => { play(GENERIC_CLICK); onHome(); }} title="Return to Home">
           Home
         </button>
       )}
 
       {zoomed && !selectedTomb && (
-        <button className="zoom-out-btn" onClick={(e) => { e.stopPropagation(); zoomingRef.current = true; gsap.to(mapRef.current, { scale: 1, x: 0, y: 0, duration: 0.6, ease: 'power2.inOut', onComplete: () => { mapRef.current.classList.remove('cemetery-map--zoomed'); setZoomed(false); zoomingRef.current = false } }) }}>
+        <button className="zoom-out-btn" onClick={(e) => { e.stopPropagation(); play(GENERIC_CLICK); zoomingRef.current = true; gsap.to(mapRef.current, { scale: 1, x: 0, y: 0, duration: 0.6, ease: 'power2.inOut', onComplete: () => { mapRef.current.classList.remove('cemetery-map--zoomed'); setZoomed(false); zoomingRef.current = false } }) }}>
           zoom out
         </button>
       )}

@@ -3,6 +3,8 @@ import { AnimatePresence } from 'framer-motion'
 import OpeningScreen from './screens/OpeningScreen'
 import GateScreen from './screens/GateScreen'
 import ObjectuaryScreen from './screens/ObjectuaryScreen'
+import { useAudio } from './hooks/useAudio'
+import { AMBIENT_SOUNDTRACK, GENERIC_CLICK } from './audio'
 import './styles/global.css'
 
 const INACTIVITY_TIMEOUT_MS = 30_000
@@ -12,6 +14,8 @@ export default function App() {
   const [revealing, setRevealing] = useState(false)
   const [objectuaryKey, setObjectuaryKey] = useState(0)
   const inactivityTimer = useRef(null)
+  const { loop, play } = useAudio()
+  const soundtrackStarted = useRef(false)
 
   const goTo = (screen) => setCurrentScreen(screen)
 
@@ -35,15 +39,42 @@ export default function App() {
     }, INACTIVITY_TIMEOUT_MS)
   }, [])
 
+  const handleGlobalClick = useCallback(() => {
+    play(GENERIC_CLICK)
+    const el = document.documentElement
+    if (!document.fullscreenElement && 
+        !document.webkitFullscreenElement && 
+        !document.mozFullScreenElement && 
+        !document.msFullscreenElement) {
+      const requestFS =
+        el.requestFullscreen ||
+        el.webkitRequestFullscreen ||
+        el.mozRequestFullScreen ||
+        el.msRequestFullscreen
+      if (requestFS) requestFS.call(el).catch(() => {})
+    }
+
+    // Start soundtrack on first interaction
+    if (!soundtrackStarted.current) {
+      loop(AMBIENT_SOUNDTRACK, { volume: 0.6 })
+      soundtrackStarted.current = true
+    }
+  }, [loop])
+
   useEffect(() => {
     const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll']
     events.forEach((e) => window.addEventListener(e, restartTimer, { passive: true }))
-    restartTimer() // start the timer on mount
+    
+    // Fullscreen trigger on any click
+    window.addEventListener('click', handleGlobalClick)
+    
+    restartTimer() 
     return () => {
       events.forEach((e) => window.removeEventListener(e, restartTimer))
+      window.removeEventListener('click', handleGlobalClick)
       if (inactivityTimer.current) clearTimeout(inactivityTimer.current)
     }
-  }, [restartTimer])
+  }, [restartTimer, handleGlobalClick])
 
   // Gate→Cemetery is special: cemetery renders underneath the gate,
   // gate slides apart revealing it, then gate unmounts. No AnimatePresence swap.

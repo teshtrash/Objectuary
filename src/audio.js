@@ -22,7 +22,8 @@ export const ZOOM_OUT = '/audio/zoom-out.mp3'
 
 // ── Tomb interaction ─────────────────────────────────────────────────
 export const GRAVE_HOVER = '/audio/grave-hover.mp3'   // +1 Attention chime on click
-export const CLICK = '/audio/click.mp3'               // generic UI click
+export const CLICK = '/audio/click.mp3'               // legacy UI click
+export const GENERIC_CLICK = '/audio/soundreality-mouse-click-5-381777.mp3' // new generic click sound
 
 // ── Objectuary paper ─────────────────────────────────────────────────
 export const SCANNER_HOVERING = '/audio/scanner-hovering.mp3' // scanner appears / paper opens

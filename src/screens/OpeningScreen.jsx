@@ -1,10 +1,13 @@
 import { motion } from 'framer-motion'
 import { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import { useAudio } from '../hooks/useAudio'
+import { GENERIC_CLICK } from '../audio'
 import './OpeningScreen.css'
 
 export default function OpeningScreen({ onEnter }) {
   const containerRef = useRef(null)
+  const { play } = useAudio()
 
   useEffect(() => {
     const tl = gsap.timeline({ delay: 0.8 })
@@ -36,11 +39,11 @@ export default function OpeningScreen({ onEnter }) {
     >
       <div className="opening-content">
         <div className="critique-block">
+          <div className="opening-header critique-item">
+            <h1 className="opening-title">Objectuary</h1>
+            <p className="opening-subtitle">where objects go when they're no longer allowed to exist</p>
+          </div>
           <p className="critique-item">
-            <strong>Objectuary</strong><br />
-            where objects go when they're no longer allowed to exist
-          </p>
-          <p className="critique-item" style={{ marginBottom: '1.5rem' }}>
             Some things don't just disappear — they get pushed out. Objects, like people, can be othered: replaced, repurposed, buried, or simply ignored until they stop mattering. This is a cemetery for those objects. Each grave holds a story of exclusion, displacement, or quiet erasure. You're here to read the obituaries.
           </p>
           <p className="critique-item">
@@ -60,13 +63,7 @@ export default function OpeningScreen({ onEnter }) {
         <button
           className="enter-btn"
           onClick={() => {
-            const el = document.documentElement
-            const requestFS =
-              el.requestFullscreen ||
-              el.webkitRequestFullscreen ||
-              el.mozRequestFullScreen ||
-              el.msRequestFullscreen
-            if (requestFS) requestFS.call(el).catch(() => {})
+            play(GENERIC_CLICK)
             onEnter()
           }}
         >
